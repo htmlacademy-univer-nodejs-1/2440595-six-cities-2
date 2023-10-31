@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import CliApplication from './cli-application/cli.js';
-import HelpCommand from './cli-application/commands/help.command.js';
-import VersionCommand from './cli-application/commands/version.command.js';
+import CLIApplication from './cli-application/cli.js';
+import HelpCommand from './cli-application/commands/help.command';
+import ImportCommand from './cli-application/commands/import.command';
+import VersionCommand from './cli-application/commands/version.command';
 
-const myManager = new CliApplication();
-myManager.registerCommands([new HelpCommand, new VersionCommand]);
-myManager.processCommand(process.argv);
+const cliApp = new CLIApplication();
+cliApp.registerCommands([new HelpCommand, new VersionCommand, new ImportCommand]);
+cliApp.processCommand(process.argv);
