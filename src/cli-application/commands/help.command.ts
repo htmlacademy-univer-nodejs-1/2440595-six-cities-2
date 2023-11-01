@@ -10,6 +10,7 @@ export default class HelpCliCommand implements CliCommandInterface {
             --version:                   # выводит номер версии
             --help:                      # печатает этот текст
             --import <path>:             # импортирует данные из TSV
+            --generate <n> <path> <url>  # генерирует произвольное количество тестовых данных
         `;
 
   public async execute(): Promise<void> {
