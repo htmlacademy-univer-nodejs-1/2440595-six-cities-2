@@ -20,7 +20,7 @@ export const configRestSchema = convict<RestSchema>({
     doc: 'Salt for password hash',
     format: String,
     env: 'SALT',
-    default: null
+    default: '9876000'
   },
   DB_HOST: {
     doc: 'IP address of the database server',
