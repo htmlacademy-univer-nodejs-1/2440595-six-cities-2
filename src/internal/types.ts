@@ -88,3 +88,9 @@ export const CityCoordinates: CityWithCoordinates = {
   [City.Hamburg]: {latitude: 53.550341, longitude: 10.000654},
   [City.Dusseldorf]: {latitude: 51.225402, longitude: 6.776314}
 };
+
+export const AppComponent = {
+  Application: Symbol.for('Application'),
+  LoggerInterface: Symbol.for('LoggerInterface'),
+  ConfigInterface: Symbol.for('ConfigInterface'),
+} as const;
