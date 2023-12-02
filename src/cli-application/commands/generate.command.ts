@@ -1,36 +1,35 @@
-import { CliCommandInterface } from './cli-command.interface.js';
-import got from 'got';
-import OfferGenerator from '../offer-generator/offer-generator.js';
+import {CliCommandInterface} from './cli-command.interface';
+import {MockData} from '../../internal/types.js';
+import OfferGenerator from '../../cli-application/offer-generator/offer-generator.js';
 import TSVFileWriter from '../file-writer/file-write.js';
-
-export type MockData = {
-  titles: string[];
-  descriptions: string[];
-  images: string[];
-}
+import ConsoleLoggerService from '../logger/logger.service.js';
+import {LoggerInterface} from '../logger/logger.interface.js';
 
 export default class GenerateCommand implements CliCommandInterface {
   public readonly name = '--generate';
   private initialData!: MockData;
+  private readonly logger: LoggerInterface;
 
-  public async execute(...parameters:string[]): Promise<void> {
+  constructor() {
+    this.logger = new ConsoleLoggerService();
+  }
+
+  public async execute(...parameters: string[]): Promise<void> {
     const [count, filepath, url] = parameters;
     const offerCount = Number.parseInt(count, 10);
-
     try {
-      this.initialData = await got.get(url).json();
+      const res = await fetch(url);
+      this.initialData = await res.json();
     } catch {
-      console.log(`Can't fetch data from ${url}.`);
-      return;
+      this.logger.error(`Не получилось получить данные с ${url}`);
     }
-
-    const offerGeneratorString = new OfferGenerator(this.initialData);
-    const tsvFileWriter = new TSVFileWriter(filepath);
+    const offerGenerator = new OfferGenerator(this.initialData);
+    const fileWriter = new TSVFileWriter(filepath);
 
     for (let i = 0; i < offerCount; i++) {
-      await tsvFileWriter.write(offerGeneratorString.generate());
+      await fileWriter.write(offerGenerator.generate());
     }
 
-    console.log(`File ${filepath} was created!`);
+    this.logger.info(`Файл ${filepath} был успешно создан`);
   }
 }

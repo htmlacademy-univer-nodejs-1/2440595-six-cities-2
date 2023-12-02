@@ -10,10 +10,44 @@
       "Сдам квартиру для двух студентов",
       "Сдам квартиру для трёх студентов"
     ],
+    "previewImages": [
+      "previewImage1.jpg",
+      "previewImage2.jpg",
+      "previewImage3.jpg"
+    ],
     "images": [
-      "image_.jpg",
+      "image1.jpg",
       "image2.jpg",
       "image3.jpg"
-    ]
+    ],
+    "coordinates": {
+      "latitude": [
+        1.2345,
+        2.3456,
+        3.4567
+      ],
+      "longitude": [
+        4.5678,
+        5.6789,
+        6.7891
+      ]
+    },
+    "users": {
+      "usernames": [
+        "Глеб",
+        "Сергей",
+        "Илья"
+      ],
+      "avatars": [
+        "avatar1.jpg",
+        "avatar2.jpg",
+        "avatar3.jpg"
+      ],
+      "emails": [
+        "gleb@email.local",
+        "sergay@email.local",
+        "ilya@email.local"
+      ]
+    }
   }
 }

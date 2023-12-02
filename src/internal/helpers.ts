@@ -1,4 +1,18 @@
-import { Offer, City, Coordinates, Housing, Facility } from './types.js';
+import * as crypto from 'node:crypto';
+import {Offer, City, Housing, Facility, UserType} from './types.js';
+
+export const DEFAULT_DB_PORT = '27017';
+export const DEFAULT_USER_PASSWORD = '123456';
+export const MIN_COST = 100;
+export const MAX_COST = 100000;
+export const MIN_RATING = 1;
+export const MAX_RATING = 5;
+export const MIN_COUNT = 1;
+export const MAX_COUNT = 10;
+export const MIN_COUNT_ROOM = 1;
+export const MAX_COUNT_ROOM = 8;
+export const FIRST_WEEK_DAY = 1;
+export const LAST_WEEK_DAY = 7;
 
 export function generateRandomNumber(min:number, max: number, numAfterDigit = 0): number {
   return +((Math.random() * (max - min)) + min).toFixed(numAfterDigit);
@@ -6,7 +20,7 @@ export function generateRandomNumber(min:number, max: number, numAfterDigit = 0)
 
 export function getRandomItems<T>(items: T[]):T[] {
   const startPosition = generateRandomNumber(0, items.length - 1);
-  const endPosition = startPosition + generateRandomNumber(startPosition, items.length);
+  const endPosition = startPosition + 1 + generateRandomNumber(startPosition, items.length);
   return items.slice(startPosition, endPosition);
 }
 
@@ -23,49 +37,69 @@ export function generateId() {
 }
 
 export function createOffer(offerData: string): Offer {
-  const [
-    title,
+  const [name,
     description,
-    publishDate,
+    publicationDate,
     city,
     previewImage,
     images,
-    isPremium,
-    isFavourite,
+    premium,
+    favorite,
     rating,
     housingType,
-    roomsNumber,
-    guestsNumber,
-    price,
+    roomCount,
+    guestCount,
+    cost,
     facilities,
-    authorId,
-    commentsIds,
-    coordinates
-  ] = offerData.replace('\n', '').split('\t');
-
-  const commentsIdsParsed = commentsIds.split(';').filter((comment) => comment.length > 0);
-  const stringToBoolean = (s: string): boolean => s === 'true';
-  const coordinatesArray = coordinates.split(';').map((coordinate) => parseFloat(coordinate));
-  const coordinatesParsed: Coordinates = {latitude: coordinatesArray[0], longitude: coordinatesArray[1]};
+    offerAuthorName,
+    offerAuthorAvatar,
+    offerAuthorType,
+    offerAuthorEmail,
+    commentsCount,
+    latitude,
+    longitude] = offerData.replace('\n', '').split('\t');
 
   return {
-    title,
-    description,
-    publishDate: new Date(publishDate),
-    city: city as City,
-    previewImage,
-    images:  images.split(';'),
-    isPremium: stringToBoolean(isPremium),
-    isFavourite: stringToBoolean(isFavourite),
+    name: name,
+    description: description,
+    publicationDate: new Date(publicationDate),
+    city: city as unknown as City,
+    previewImage: previewImage,
+    images: images.split(','),
+    premium: premium as unknown as boolean,
+    favorite: favorite as unknown as boolean,
     rating: parseFloat(rating),
-    housingType: Housing[housingType as keyof typeof Housing],
-    roomsNumber: parseInt(roomsNumber, 10),
-    guestsNumber: parseInt(guestsNumber, 10),
-    price: parseFloat(price),
-    facilities: facilities.split(';').map((facility) => Facility[facility as keyof typeof Facility]),
-    authorId,
-    commentsIds: commentsIdsParsed,
-    commentsNumber: commentsIdsParsed.length,
-    coordinates: coordinatesParsed
-  } as Offer;
+    housingType: housingType as unknown as Housing,
+    roomCount: parseInt(roomCount, 10),
+    guestCount: parseInt(guestCount, 10),
+    cost: parseInt(cost, 10),
+    facilities: facilities.split(',').map((x) => x as unknown as Facility),
+    offerAuthor: {
+      name: offerAuthorName,
+      avatarPath: offerAuthorAvatar,
+      type: offerAuthorType as unknown as UserType,
+      email: offerAuthorEmail,
+    },
+    commentsCount: parseInt(commentsCount, 10),
+    coordinates: {
+      latitude: parseFloat(latitude), longitude: parseFloat(longitude)
+    }
+  };
+}
+
+export const getConnectionString = (
+  username: string | number,
+  password: string | number,
+  host: string,
+  port: string | number,
+  databaseName: string | number,
+): string => `mongodb://${username}:${password}@${host}:${port}/${databaseName}?authSource=admin`;
+
+export const createSHA256 = (line: string, salt: string): string => {
+  const hashed = crypto.createHmac('sha256', salt);
+  return hashed.update(line).digest('hex');
+};
+
+export function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : '';
 }

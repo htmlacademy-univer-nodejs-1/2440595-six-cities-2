@@ -4,6 +4,8 @@
 /lib/
 /dist/
 /docs/
+./mongodb
+mongodb/
 .idea/*
 
 .DS_Store
