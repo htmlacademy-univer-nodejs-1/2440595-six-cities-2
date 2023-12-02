@@ -16,7 +16,6 @@ export type User = {
   name: string,
   email: string,
   avatarPath?: string,
-  password: string,
   type: UserType,
 };
 
@@ -54,30 +53,40 @@ export enum Housing {
 }
 
 export type Offer = {
-  title: string,
-  description: string,
-  publishDate: Date,
-  city: City,
-  previewImage: string,
-  images: string[],
-  isPremium: boolean,
-  isFavourite: boolean,
-  rating: number,
-  housingType: Housing,
-  roomsNumber: number,
-  guestsNumber: number,
-  price: number,
-  facilities: Facility[],
-  authorId: string,
-  commentsIds: string[],
-  commentsNumber: number,
+  name: string;
+  description: string;
+  publicationDate: Date;
+  city: City;
+  previewImage: string;
+  images: string[];
+  premium: boolean;
+  favorite: boolean;
+  rating: number;
+  housingType: Housing;
+  roomCount: number;
+  guestCount: number;
+  cost: number;
+  facilities: Facility[];
+  offerAuthor: User;
+  commentsCount: number;
   coordinates: Coordinates
 }
 
 export type MockData = {
-  titles: string[];
-  descriptions: string[];
-  images: string[];
+  names: string[],
+  descriptions: string[],
+  previewImages: string[],
+  images: string[],
+  coordinates: {
+    latitude: number[],
+    longitude: number[]
+  },
+  users: {
+    usernames: string[],
+    avatars: string[],
+    emails: string[],
+    passwords: string[]
+  }
 }
 
 export const CityCoordinates: CityWithCoordinates = {
@@ -93,4 +102,11 @@ export const AppComponent = {
   Application: Symbol.for('Application'),
   LoggerInterface: Symbol.for('LoggerInterface'),
   ConfigInterface: Symbol.for('ConfigInterface'),
+  DatabaseClientInterface: Symbol.for('DatabaseClientInterface'),
+  UserServiceInterface: Symbol.for('UserServiceInterface'),
+  UserModel: Symbol.for('UserModel'),
+  CoordinatesServiceInterface: Symbol.for('CoordinatesServiceInterface'),
+  CoordinatesModel: Symbol.for('CoordinatesModel'),
+  OfferServiceInterface: Symbol.for('OfferServiceInterface'),
+  OfferModel: Symbol.for('OfferModel'),
 } as const;

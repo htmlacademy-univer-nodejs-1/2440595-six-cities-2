@@ -1,17 +1,35 @@
 import { LoggerInterface } from './logger/logger.interface.js';
 import { ConfigInterface } from './config/config.interface.js';
-import { RestSchema } from './config/rest.schema.js';
+import { ConfigSchema } from './config/config.schema.js';
 import {inject, injectable} from 'inversify';
 import {AppComponent} from '../internal/types.js';
+import {DatabaseClientInterface} from './db-client/database-client.interface';
+import {getConnectionString} from '../internal/helpers.js';
 
 @injectable()
 export default class RestApplication {
   constructor(@inject(AppComponent.LoggerInterface) private readonly logger: LoggerInterface,
-              @inject(AppComponent.ConfigInterface) private readonly config: ConfigInterface<RestSchema>) {
+              @inject(AppComponent.ConfigInterface) private readonly config: ConfigInterface<ConfigSchema>,
+              @inject(AppComponent.DatabaseClientInterface) private readonly databaseClient: DatabaseClientInterface
+  ) {
   }
 
   public async init() {
-    this.logger.info('Application init');
-    this.logger.info(`Get value from env $PORT: ${this.config.get('PORT')}`);
+    this.logger.info('Приложение инициализировано');
+    this.logger.info(`PORT: ${this.config.get('PORT')}`);
+    this.logger.info(`DB_HOST: ${this.config.get('DB_HOST')}`);
+    this.logger.info(`SALT: ${this.config.get('SALT')}`);
+
+    this.logger.info('База данных инициализируется');
+    const mongoUri = getConnectionString(
+      this.config.get('DB_USER'),
+      this.config.get('DB_PASSWORD'),
+      this.config.get('DB_HOST'),
+      this.config.get('DB_PORT'),
+      this.config.get('DB_NAME'),
+    );
+
+    await this.databaseClient.connect(mongoUri);
+    this.logger.info('База данных инициализирована');
   }
 }
