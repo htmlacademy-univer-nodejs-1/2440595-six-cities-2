@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import {Offer, City, Housing, Facility, User} from './types.js';
+import {Offer, City, Housing, Facility, UserType} from './types.js';
 
 export const DEFAULT_DB_PORT = '27017';
 export const DEFAULT_USER_PASSWORD = '123456';
@@ -20,7 +20,7 @@ export function generateRandomNumber(min:number, max: number, numAfterDigit = 0)
 
 export function getRandomItems<T>(items: T[]):T[] {
   const startPosition = generateRandomNumber(0, items.length - 1);
-  const endPosition = startPosition + generateRandomNumber(startPosition, items.length);
+  const endPosition = startPosition + 1 + generateRandomNumber(startPosition, items.length);
   return items.slice(startPosition, endPosition);
 }
 
@@ -77,7 +77,7 @@ export function createOffer(offerData: string): Offer {
     offerAuthor: {
       name: offerAuthorName,
       avatarPath: offerAuthorAvatar,
-      type: offerAuthorType as unknown as User,
+      type: offerAuthorType as unknown as UserType,
       email: offerAuthorEmail,
     },
     commentsCount: parseInt(commentsCount, 10),

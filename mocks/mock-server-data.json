@@ -37,17 +37,17 @@
         "Глеб",
         "Сергей",
         "Илья"
+      ],
+      "avatars": [
+        "avatar1.jpg",
+        "avatar2.jpg",
+        "avatar3.jpg"
+      ],
+      "emails": [
+        "gleb@email.local",
+        "sergay@email.local",
+        "ilya@email.local"
       ]
-    },
-    "avatars": [
-      "avatar1.jpg",
-      "avatar2.jpg",
-      "avatar3.jpg"
-    ],
-    "emails": [
-      "gleb@email.local",
-      "sergay@email.local",
-      "ilya@email.local"
-    ]
+    }
   }
 }

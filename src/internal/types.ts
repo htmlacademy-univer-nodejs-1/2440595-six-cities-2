@@ -73,7 +73,7 @@ export type Offer = {
 }
 
 export type MockData = {
-  names: string[],
+  titles: string[],
   descriptions: string[],
   previewImages: string[],
   images: string[],

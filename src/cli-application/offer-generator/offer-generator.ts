@@ -24,7 +24,7 @@ export default class OfferGenerator implements OfferGeneratorInterface {
   constructor(private readonly mockData: MockData) {}
 
   public generate(): string {
-    const name = getRandomItem<string>(this.mockData.names);
+    const name = getRandomItem<string>(this.mockData.titles);
     const description = getRandomItem<string>(this.mockData.descriptions);
     const publicationDate = dayjs().subtract(generateRandomNumber(FIRST_WEEK_DAY, LAST_WEEK_DAY), 'day').toISOString();
     const city = getRandomItem(cities);
