@@ -105,8 +105,13 @@ export const AppComponent = {
   DatabaseClientInterface: Symbol.for('DatabaseClientInterface'),
   UserServiceInterface: Symbol.for('UserServiceInterface'),
   UserModel: Symbol.for('UserModel'),
-  CoordinatesServiceInterface: Symbol.for('CoordinatesServiceInterface'),
-  CoordinatesModel: Symbol.for('CoordinatesModel'),
   OfferServiceInterface: Symbol.for('OfferServiceInterface'),
   OfferModel: Symbol.for('OfferModel'),
+  CommentServiceInterface: Symbol.for('CommentServiceInterface'),
+  CommentModel: Symbol.for('CommentModel'),
 } as const;
+
+export enum SortType {
+  Down = -1,
+  Up = 1,
+}
