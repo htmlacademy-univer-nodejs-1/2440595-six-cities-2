@@ -1,3 +1,5 @@
+import {NextFunction, Request, Response} from 'express';
+
 export enum City {
   Paris = 'Paris',
   Cologne = 'Cologne',
@@ -109,9 +111,27 @@ export const AppComponent = {
   OfferModel: Symbol.for('OfferModel'),
   CommentServiceInterface: Symbol.for('CommentServiceInterface'),
   CommentModel: Symbol.for('CommentModel'),
+  OfferController: Symbol.for('OfferController'),
+  UserController: Symbol.for('UserController'),
+  ExceptionFilter: Symbol.for('ExceptionFilter'),
 } as const;
 
 export enum SortType {
   Down = -1,
   Up = 1,
+}
+
+export enum HttpMethod {
+  Get = 'get',
+  Post = 'post',
+  Delete = 'delete',
+  Patch = 'patch',
+  Put = 'put',
+}
+
+
+export interface RouteInterface {
+  path: string;
+  method: HttpMethod;
+  handler: (req: Request, res: Response, next: NextFunction) => void;
 }
