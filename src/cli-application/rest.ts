@@ -11,48 +11,19 @@ import {ExceptionFilter} from './http/exception-filter.interface.js';
 
 @injectable()
 export default class RestApplication {
-  private expressApplication: Express;
+  private server: Express;
   constructor(@inject(AppComponent.LoggerInterface) private readonly logger: LoggerInterface,
               @inject(AppComponent.ConfigInterface) private readonly config: ConfigInterface<ConfigSchema>,
               @inject(AppComponent.DatabaseClientInterface) private readonly databaseClient: DatabaseClientInterface,
+              @inject(AppComponent.UserController) private readonly userController: ControllerInterface,
               @inject(AppComponent.OfferController) private readonly offerController: ControllerInterface,
-              @inject(AppComponent.UserController) private userController: ControllerInterface,
+              @inject(AppComponent.CommentController) private readonly commentController: ControllerInterface,
               @inject(AppComponent.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter,
   ) {
-    this.expressApplication = express();
+    this.server = express();
   }
 
-  private async _initMiddleware() {
-    this.expressApplication.use(express.json());
-  }
-
-  private async _initServer() {
-    this.logger.info('Сервер инициализируется');
-
-    const port = this.config.get('PORT');
-    this.expressApplication.listen(port);
-
-    this.logger.info(`Сервер успешно стартовал на http://localhost:${this.config.get('PORT')}`);
-  }
-
-  private async _initRoutes() {
-    this.logger.info('Контроллеры инициализируются');
-    this.expressApplication.use('/offers', this.offerController.router);
-    this.expressApplication.use('/users', this.userController.router);
-    this.logger.info('Контроллеры успешно инициализированы');
-  }
-
-  private async _initExceptionFilters() {
-    this.expressApplication.use(this.appExceptionFilter.catch.bind(this.appExceptionFilter));
-  }
-
-  public async init() {
-    this.logger.info('Приложение инициализировано');
-    this.logger.info(`PORT: ${this.config.get('PORT')}`);
-    this.logger.info(`DB_HOST: ${this.config.get('DB_HOST')}`);
-    this.logger.info(`SALT: ${this.config.get('SALT')}`);
-
-    this.logger.info('База данных инициализируется');
+  private async _initDb() {
     const mongoUri = getConnectionString(
       this.config.get('DB_USER'),
       this.config.get('DB_PASSWORD'),
@@ -61,11 +32,49 @@ export default class RestApplication {
       this.config.get('DB_NAME'),
     );
 
-    await this.databaseClient.connect(mongoUri);
-    this.logger.info('База данных инициализирована');
-    await this._initRoutes();
+    return this.databaseClient.connect(mongoUri);
+  }
+
+  private async _initServer() {
+    const port = this.config.get('PORT');
+    this.server.listen(port);
+  }
+
+  private async _initRoutes() {
+    this.server.use('/users', this.userController.router);
+    this.server.use('/offers', this.offerController.router);
+    this.server.use('/comments', this.commentController.router);
+  }
+
+  private async _initMiddleware() {
+    this.server.use(express.json());
+  }
+
+  private async _initExceptionFilters() {
+    this.server.use(this.appExceptionFilter.catch.bind(this.appExceptionFilter));
+  }
+
+  public async init() {
+    this.logger.info('Application initialization');
+
+    this.logger.info('Init database');
+    await this._initDb();
+    this.logger.info('Init database completed');
+
+    this.logger.info('Init middlewares');
     await this._initMiddleware();
+    this.logger.info('Middlewares initialization completed');
+
+    this.logger.info('Init routes');
+    await this._initRoutes();
+    this.logger.info('Routes initialization completed');
+
+    this.logger.info('Init exception filters');
     await this._initExceptionFilters();
+    this.logger.info('Exception filters initialization completed');
+
+    this.logger.info('Try to init server...');
     await this._initServer();
+    this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);
   }
 }
