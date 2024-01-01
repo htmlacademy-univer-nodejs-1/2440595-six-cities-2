@@ -1,4 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
+import {ParamsDictionary} from 'express-serve-static-core';
+import {MiddlewareInterface} from '../cli-application/middleware/middleware.interface.js';
 
 export enum City {
   Paris = 'Paris',
@@ -114,6 +116,7 @@ export const AppComponent = {
   OfferController: Symbol.for('OfferController'),
   UserController: Symbol.for('UserController'),
   ExceptionFilter: Symbol.for('ExceptionFilter'),
+  CommentController: Symbol.for('CommentController'),
 } as const;
 
 export enum SortType {
@@ -134,4 +137,22 @@ export interface RouteInterface {
   path: string;
   method: HttpMethod;
   handler: (req: Request, res: Response, next: NextFunction) => void;
+  middlewares?: MiddlewareInterface[];
 }
+
+export interface DocumentExistsInterface {
+  exists(documentId: string): Promise<boolean>;
+}
+
+
+export type ParamsOffer = {
+  offerId: string;
+} | ParamsDictionary
+
+export type ParamsCity = {
+  city: string;
+}| ParamsDictionary
+
+export type ParamsOffersCount = {
+  count: string;
+}| ParamsDictionary

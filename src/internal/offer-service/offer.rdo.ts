@@ -1,7 +1,14 @@
-import { Expose } from 'class-transformer';
-import {City, Housing} from '../types.js';
+import { Expose, Type } from 'class-transformer';
+import {City, Coordinates, Facility, Housing, User} from '../types.js';
+import UserRdo from '../../internal/user-service/user.rdo.js';
 
 export class OfferRdo {
+  @Expose()
+  public id!: string;
+
+  @Expose()
+    description!: string;
+
   @Expose()
     name!: string;
 
@@ -13,6 +20,9 @@ export class OfferRdo {
 
   @Expose()
     previewImage!: string;
+
+  @Expose()
+    images!: string[];
 
   @Expose()
     premium!: boolean;
@@ -31,4 +41,20 @@ export class OfferRdo {
 
   @Expose()
     commentsCount!: number;
+
+  @Expose()
+    roomCount!: number;
+
+  @Expose()
+    guestCount!: number;
+
+  @Expose()
+    facilities!: Facility[];
+
+  @Expose({name: 'userId'})
+  @Type(() => UserRdo)
+    offerAuthor!: User;
+
+  @Expose()
+    coordinates!: Coordinates;
 }

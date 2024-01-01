@@ -5,8 +5,8 @@ import {OfferEntity} from './offer.entity.js';
 import {OfferServiceInterface} from './offer-service.interface.js';
 import {AppComponent} from '../types.js';
 import {LoggerInterface} from '../../cli-application/logger/logger.interface.js';
-import {UpdateOfferDto} from './update-offer.dto.js';
 import {SortType} from '../types.js';
+import {UpdateOfferDto} from './update-offer.dto.js';
 
 const MAX_PREMIUM_OFFERS_COUNT = 3;
 const MAX_OFFERS_COUNT = 60;
@@ -21,7 +21,7 @@ export default class OfferService implements OfferServiceInterface {
 
   public async create(dto: OfferDto): Promise<DocumentType<OfferEntity>> {
     const result = await this.offerModel.create(dto);
-    this.logger.info(`Новое предложение создано: ${dto.name}`);
+    this.logger.info(`New offer was created: ${dto.name}`);
     return result;
   }
 
