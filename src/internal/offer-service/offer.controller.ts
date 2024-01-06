@@ -4,7 +4,7 @@ import {AppComponent, HttpMethod, ParamsCity, ParamsOffer, ParamsOffersCount} fr
 import {Controller} from '../../cli-application/controller/controller.abstract.js';
 import {LoggerInterface} from '../../cli-application/logger/logger.interface.js';
 import {fillDTO} from '../helpers.js';
-import {OfferRdo} from './offer.rdo';
+import {OfferRdo} from './offer.rdo.js';
 import CreateOfferDto from './offer.dto.js';
 import UpdateOfferDto from './update-offer.dto.js';
 import {OfferServiceInterface} from './offer-service.interface.js';

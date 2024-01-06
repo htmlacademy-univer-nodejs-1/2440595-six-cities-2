@@ -6,7 +6,7 @@ import {OfferServiceInterface} from './offer-service.interface.js';
 import {AppComponent} from '../types.js';
 import {LoggerInterface} from '../../cli-application/logger/logger.interface.js';
 import {SortType} from '../types.js';
-import {UpdateOfferDto} from './update-offer.dto.js';
+import UpdateOfferDto from './update-offer.dto.js';
 
 const MAX_PREMIUM_OFFERS_COUNT = 3;
 const MAX_OFFERS_COUNT = 60;

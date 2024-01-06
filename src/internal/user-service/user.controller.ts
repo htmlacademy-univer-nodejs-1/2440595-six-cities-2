@@ -21,14 +21,14 @@ import {UploadMiddleware} from '../../cli-application/middleware/upload.middlewa
 @injectable()
 export default class UserController extends Controller {
   constructor(@inject(AppComponent.LoggerInterface) logger: LoggerInterface,
-              @inject(AppComponent.OfferServiceInterface) private readonly userService: UserServiceInterface,
+              @inject(AppComponent.UserServiceInterface) private readonly userService: UserServiceInterface,
               @inject(AppComponent.ConfigInterface) private readonly configService: ConfigInterface<ConfigSchema>
   ) {
     super(logger);
 
     this.logger.info('Register routes for CategoryController…');
 
-    this.addRoute({path: '/register', method: HttpMethod.Get, handler: this.register});
+    this.addRoute({path: '/register', method: HttpMethod.Post, handler: this.register});
     this.addRoute({path: '/login', method: HttpMethod.Post, handler: this.login});
     this.addRoute({path: '/logout', method: HttpMethod.Post, handler: this.logout});
     this.addRoute({
