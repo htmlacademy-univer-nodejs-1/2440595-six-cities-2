@@ -2,7 +2,7 @@ import {City, Housing, Facility, Coordinates} from '../types.js';
 import {
   ArrayNotEmpty,
   IsArray,
-  IsBoolean, IsDateString,
+  IsBoolean,
   IsEnum,
   IsObject, IsOptional,
   IsString,
@@ -34,10 +34,6 @@ export default class UpdateOfferDto {
   @IsArray({message: 'field images must be an array'})
   @IsString({each: true, message: 'image path should be string'})
   public images?: string[];
-
-  @IsOptional()
-  @IsDateString({}, {message: 'postDate must be a valid ISO string'})
-  public publicationDate!: Date;
 
   @IsOptional()
   @IsBoolean({message: 'field premium must be boolean'})
