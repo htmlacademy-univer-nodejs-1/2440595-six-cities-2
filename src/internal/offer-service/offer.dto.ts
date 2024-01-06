@@ -2,7 +2,7 @@ import { City, Housing, Facility, Coordinates } from '../types.js';
 import {
   ArrayNotEmpty,
   IsArray,
-  IsBoolean, IsDateString,
+  IsBoolean,
   IsEnum,
   IsObject,
   IsString,
@@ -20,9 +20,6 @@ export default class CreateOfferDto {
   @MinLength(20, {message: 'Min length for description is 20'})
   @MaxLength(1024, {message: 'Max length for description is 1024'})
   public description!: string;
-
-  @IsDateString({}, {message: 'postDate must be a valid ISO string'})
-  public publicationDate!: Date;
 
   @IsEnum(City, {message: 'type must be one of the city'})
   public city!: City;
