@@ -11,6 +11,7 @@ export type ConfigSchema = {
   DB_PORT: string;
   DB_NAME: string;
   UPLOAD_DIRECTORY: string;
+  JWT_SECRET: string;
 
 }
 
@@ -61,6 +62,12 @@ export const configSchema = convict<ConfigSchema>({
     doc: 'Директория для загрузки файлов',
     format: String,
     env: 'UPLOAD_DIRECTORY',
+    default: null
+  },
+  JWT_SECRET: {
+    doc: 'Секрет для JWT',
+    format: String,
+    env: 'JWT_SECRET',
     default: null
   }
 });

@@ -156,3 +156,4 @@ export type ParamsCity = {
 export type ParamsOffersCount = {
   count: string;
 }| ParamsDictionary
+

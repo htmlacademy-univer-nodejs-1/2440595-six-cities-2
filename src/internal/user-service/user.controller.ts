@@ -4,7 +4,7 @@ import {AppComponent} from '../types.js';
 import {Controller} from '../../cli-application/controller/controller.abstract.js';
 import {LoggerInterface} from '../../cli-application/logger/logger.interface.js';
 import {HttpMethod} from '../types.js';
-import {fillDTO} from '../helpers.js';
+import {createJWT, JWT_ALGORITHM, fillDTO} from '../helpers.js';
 import {UserServiceInterface} from './user-service.interface.js';
 import CreateUserDto from './user.dto.js';
 import {HttpError} from '../../cli-application/http/http.error.js';
@@ -13,9 +13,13 @@ import {ConfigInterface} from '../../cli-application/config/config.interface.js'
 import {ConfigSchema} from '../../cli-application/config/config.schema.js';
 import UserRdo from './user.rdo.js';
 import LoginUserDto from './login-user.dto.js';
-import {FullOfferRdo} from '../offer-service/full-offer.rdo.js';
 import {ValidateObjectIdMiddleware} from '../../cli-application/middleware/object-id.validate.middleware.js';
 import {UploadMiddleware} from '../../cli-application/middleware/upload.middleware.js';
+import EnteredUserRdo from './entered.user.rdo.js';
+import {BLACK_LIST_TOKENS} from '../../cli-application/middleware/authenticate.middleware.js';
+import {PrivateRouteMiddleware} from '../../cli-application/middleware/private.route.middleware.js';
+import {DtoValidateMiddleware} from '../../cli-application/middleware/dto.validate.middleware.js';
+import {LoginUserRequest} from './login-user-request.js';
 
 
 @injectable()
@@ -28,9 +32,35 @@ export default class UserController extends Controller {
 
     this.logger.info('Register routes for CategoryController…');
 
-    this.addRoute({path: '/register', method: HttpMethod.Post, handler: this.register});
-    this.addRoute({path: '/login', method: HttpMethod.Post, handler: this.login});
-    this.addRoute({path: '/logout', method: HttpMethod.Post, handler: this.logout});
+    this.addRoute({
+      path: '/register',
+      method: HttpMethod.Post,
+      handler: this.register,
+      middlewares: [
+        new DtoValidateMiddleware(CreateUserDto)
+      ]
+    });
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Post,
+      handler: this.login,
+      middlewares: [
+        new DtoValidateMiddleware(LoginUserDto)
+      ]
+    });
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Get,
+      handler: this.checkAuthenticate,
+    });
+    this.addRoute({
+      path: '/logout',
+      method: HttpMethod.Post,
+      handler: this.logout,
+      middlewares: [
+        new PrivateRouteMiddleware()
+      ]
+    });
     this.addRoute({
       path: '/:userId/avatar',
       method: HttpMethod.Post,
@@ -40,9 +70,6 @@ export default class UserController extends Controller {
         new UploadMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'avatar'),
       ]
     });
-    this.addRoute({path: '/favorite/:offerId', method: HttpMethod.Post, handler: this.addFavorite});
-    this.addRoute({path: '/favorite/:offerId', method: HttpMethod.Delete, handler: this.deleteFavorite});
-    this.addRoute({path: '/favorite', method: HttpMethod.Get, handler: this.getFavorite});
   }
 
   public async register(
@@ -62,48 +89,61 @@ export default class UserController extends Controller {
     this.created(res, fillDTO(UserRdo, result));
   }
 
-  public async login(
-    {body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>,
-    _res: Response,
-  ): Promise<void> {
-    const existsUser = await this.userService.findByEmail(body.email);
+  public async login({body}: LoginUserRequest, res: Response): Promise<void> {
+    const user = await this
+      .userService
+      .verifyUser(body, this.configService.get('SALT'));
 
-    if (! existsUser) {
+    if (!user) {
       throw new HttpError(
         StatusCodes.UNAUTHORIZED,
-        `User with email ${body.email} not found.`,
+        'Unauthorized',
         'UserController',
       );
     }
 
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
+    const token = await createJWT(
+      JWT_ALGORITHM,
+      this.configService.get('JWT_SECRET'),
+      {
+        email: user.email,
+        id: user.id
+      }
     );
+    this.ok(res, fillDTO(EnteredUserRdo, {
+      email: user.email,
+      token
+    }));
   }
 
-  public async logout(_req: Request, _res: Response): Promise<void> {
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
-    );
+  public async checkAuthenticate({user: {email}}: Request, res: Response) {
+    const foundedUser = await this.userService.findByEmail(email);
+
+    if (!foundedUser) {
+      throw new HttpError(
+        StatusCodes.UNAUTHORIZED,
+        'Unauthorized',
+        'UserController'
+      );
+    }
+
+    this.ok(res, fillDTO(EnteredUserRdo, foundedUser));
   }
 
-  public async getFavorite({body}: Request<Record<string, unknown>, Record<string, unknown>, {userId: string}>, _res: Response): Promise<void> {
-    const result = await this.userService.findFavorites(body.userId);
-    this.ok(_res, fillDTO(FullOfferRdo, result));
-  }
+  public async logout(req: Request, res: Response): Promise<void> {
+    const [, token] = String(req.headers.authorization?.split(' '));
 
-  public async addFavorite({body}: Request<Record<string, unknown>, Record<string, unknown>, {offerId: string, userId: string}>, res: Response): Promise<void> {
-    await this.userService.addToFavoritesById(body.offerId, body.userId);
-    this.noContent(res, {message: 'Предложение добавлено в избранное'});
-  }
+    if (!req.user) {
+      throw new HttpError(
+        StatusCodes.UNAUTHORIZED,
+        'Unauthorized',
+        'UserController'
+      );
+    }
 
-  public async deleteFavorite({body}: Request<Record<string, unknown>, Record<string, unknown>, {offerId: string, userId: string}>, res: Response): Promise<void> {
-    await this.userService.removeFromFavoritesById(body.offerId, body.userId);
-    this.noContent(res, {message: 'Предложение удалено из избранного'});
+    BLACK_LIST_TOKENS.add(token);
+
+    this.noContent(res, {token});
   }
 
   public async uploadAvatar(req: Request, res: Response) {

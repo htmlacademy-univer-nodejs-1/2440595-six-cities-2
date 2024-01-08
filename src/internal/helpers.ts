@@ -1,9 +1,11 @@
 import * as crypto from 'node:crypto';
+import * as jose from 'jose';
 import {Offer, City, Housing, Facility, UserType} from './types.js';
 import {ClassConstructor, plainToInstance} from 'class-transformer';
 
 export const DEFAULT_DB_PORT = '27017';
 export const DEFAULT_USER_PASSWORD = '123456';
+export const JWT_ALGORITHM = 'HS256';
 export const MIN_COST = 100;
 export const MAX_COST = 100000;
 export const MIN_RATING = 1;
@@ -113,4 +115,12 @@ export function createErrorObject(message: string) {
   return {
     error: message,
   };
+}
+
+export async function createJWT(algorithm: string, jwtSecret: string, payload: object): Promise<string> {
+  return new jose.SignJWT({ ...payload })
+    .setProtectedHeader({ alg: algorithm })
+    .setIssuedAt()
+    .setExpirationTime('2d')
+    .sign(crypto.createSecretKey(jwtSecret, 'utf-8'));
 }

@@ -57,7 +57,7 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
     minlength: [6, 'Min length for password is 6'],
     maxlength: [12, 'Max length for password is 12']
   })
-  public password?: string;
+  private password?: string;
 
   constructor(userData: User) {
     super();
@@ -74,6 +74,11 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
 
   public getPassword() {
     return this.password;
+  }
+
+  public verifyPassword(password: string, salt: string) {
+    const hashPassword = createSHA256(password, salt);
+    return hashPassword === this.password;
   }
 }
 

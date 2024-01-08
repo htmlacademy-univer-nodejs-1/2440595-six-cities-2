@@ -15,6 +15,7 @@ import {DtoValidateMiddleware} from '../../cli-application/middleware/dto.valida
 import {DocumentExistsMiddleware} from '../../cli-application/middleware/doc.exists.middleware.js';
 import {CreateOfferRequest} from './create-offer-request.js';
 import {FavoriteFullOfferDto} from './favorite-full-offer.rdo.js';
+import {PrivateRouteMiddleware} from '../../cli-application/middleware/private.route.middleware.js';
 
 @injectable()
 export default class OfferController extends Controller {
@@ -35,6 +36,7 @@ export default class OfferController extends Controller {
       method: HttpMethod.Post,
       handler: this.create,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new DtoValidateMiddleware(CreateOfferDto)
       ]
     });
@@ -54,6 +56,7 @@ export default class OfferController extends Controller {
       method: HttpMethod.Patch,
       handler: this.update,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new DtoValidateMiddleware(UpdateOfferDto),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
@@ -65,6 +68,7 @@ export default class OfferController extends Controller {
       method: HttpMethod.Delete,
       handler: this.delete,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId')
       ]
     });
@@ -80,6 +84,7 @@ export default class OfferController extends Controller {
       method: HttpMethod.Post,
       handler: this.addFavorite,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
       ]
@@ -90,6 +95,7 @@ export default class OfferController extends Controller {
       method: HttpMethod.Delete,
       handler: this.deleteFavorite,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
       ]
@@ -98,7 +104,10 @@ export default class OfferController extends Controller {
     this.addRoute({
       path: '/favorites',
       method: HttpMethod.Get,
-      handler: this.showFavorites
+      handler: this.showFavorites,
+      middlewares:[
+        new PrivateRouteMiddleware()
+      ]
     });
   }
 
@@ -134,26 +143,18 @@ export default class OfferController extends Controller {
     this.ok(res, fillDTO(OfferRdo, offers));
   }
 
-  public async showFavorites({body}: Request<Record<string, unknown>, Record<string, unknown>, {
-    userId: string
-  }>, _res: Response): Promise<void> {
-    const offers = await this.userService.findFavorites(body.userId);
+  public async showFavorites({ user }: Request, _res: Response): Promise<void> {
+    const offers = await this.userService.findFavorites(user.id);
     this.ok(_res, fillDTO(FavoriteFullOfferDto, offers));
   }
 
-  public async addFavorite({body}: Request<Record<string, unknown>, Record<string, unknown>, {
-    offerId: string,
-    userId: string
-  }>, res: Response): Promise<void> {
-    await this.userService.addToFavoritesById(body.offerId, body.userId);
+  public async addFavorite({ params, user }: Request<ParamsOffer>, res: Response): Promise<void> {
+    await this.userService.addToFavoritesById(params.offerId, user.id);
     this.noContent(res, {message: 'Offer was added to favorite'});
   }
 
-  public async deleteFavorite({body}: Request<Record<string, unknown>, Record<string, unknown>, {
-    offerId: string,
-    userId: string
-  }>, res: Response): Promise<void> {
-    await this.userService.removeFromFavoritesById(body.offerId, body.userId);
+  public async deleteFavorite({ params, user }: Request<ParamsOffer>, res: Response): Promise<void> {
+    await this.userService.removeFromFavoritesById(params.offerId, user.id);
     this.noContent(res, {message: 'Offer was removed from favorite'});
   }
 }

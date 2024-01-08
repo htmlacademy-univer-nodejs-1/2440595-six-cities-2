@@ -7,6 +7,7 @@ import {LoggerInterface} from '../../cli-application/logger/logger.interface.js'
 import {types} from '@typegoose/typegoose';
 import {UserServiceInterface} from './user-service.interface.js';
 import {OfferEntity} from '../offer-service/offer.entity.js';
+import LoginUserDto from './login-user.dto.js';
 
 @injectable()
 export default class UserService implements UserServiceInterface {
@@ -21,7 +22,7 @@ export default class UserService implements UserServiceInterface {
     const user = new UserEntity({...dto, avatarPath: ''});
     user.setPassword(dto.password, salt);
 
-    const result = await this.userModel.create(dto);
+    const result = await this.userModel.create(user);
     this.logger.info(`New user was created: ${user.email}`);
 
     return result;
@@ -34,7 +35,8 @@ export default class UserService implements UserServiceInterface {
     }
 
     return this.userModel
-      .find({_id: { $in: offers.favorite }});
+      .find({_id: { $in: offers.favorite }})
+      .populate('offerId');
   }
 
   public async findByEmail(email: string): Promise<DocumentType<UserEntity> | null> {
@@ -53,6 +55,20 @@ export default class UserService implements UserServiceInterface {
 
   public async findById(userId: string): Promise<DocumentType<UserEntity> | null> {
     return this.userModel.findOne({'_id': userId});
+  }
+
+  public async verifyUser(dto: LoginUserDto, salt: string): Promise<DocumentType<UserEntity> | null> {
+    const user = await this.findByEmail(dto.email);
+
+    if (! user) {
+      return null;
+    }
+
+    if (user.verifyPassword(dto.password, salt)) {
+      return user;
+    }
+
+    return null;
   }
 
   public async addToFavoritesById(userId: string, offerId: string): Promise<DocumentType<OfferEntity>[] | null> {
