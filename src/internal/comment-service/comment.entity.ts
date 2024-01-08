@@ -27,8 +27,7 @@ export class CommentEntity extends defaultClasses.TimeStamps {
   public offerId!: Ref<OfferEntity>;
 
   @prop({
-    type: () => Date,
-    required: true
+    type: () => Date
   })
   public publicationDate!: Date;
 
