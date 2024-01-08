@@ -18,7 +18,7 @@ import {UploadMiddleware} from '../../cli-application/middleware/upload.middlewa
 import EnteredUserRdo from './entered.user.rdo.js';
 import {BLACK_LIST_TOKENS} from '../../cli-application/middleware/authenticate.middleware.js';
 import {PrivateRouteMiddleware} from '../../cli-application/middleware/private.route.middleware.js';
-import {DtoValidateMiddleware} from '../../cli-application/middleware/dto.validate.middleware';
+import {DtoValidateMiddleware} from '../../cli-application/middleware/dto.validate.middleware.js';
 import {LoginUserRequest} from './login-user-request.js';
 
 
